@@ -1,13 +1,30 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { Helmet } from "react-helmet-async";
+import { Layout } from "@/components/layout/Layout";
+import { Hero } from "@/components/home/Hero";
+import { FeaturedProducts } from "@/components/home/FeaturedProducts";
+import { Features } from "@/components/home/Features";
+import { CTASection } from "@/components/home/CTASection";
 
 const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
+    <>
+      <Helmet>
+        <title>AirPods Store - Premium Wireless Audio | Shop Now</title>
+        <meta
+          name="description"
+          content="Shop premium AirPods and wireless audio accessories. Experience pure sound with active noise cancellation, spatial audio, and seamless Apple integration. Free shipping on orders above ₹5,000."
+        />
+        <meta name="keywords" content="AirPods, AirPods Pro, AirPods Max, wireless earbuds, Apple, noise cancellation" />
+        <link rel="canonical" href="/" />
+      </Helmet>
+      
+      <Layout>
+        <Hero />
+        <FeaturedProducts />
+        <Features />
+        <CTASection />
+      </Layout>
+    </>
   );
 };
 
