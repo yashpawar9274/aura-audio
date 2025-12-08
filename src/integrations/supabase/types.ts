@@ -14,16 +14,330 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      orders: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          items: Json
+          notes: string | null
+          order_number: string
+          payment_method: string | null
+          payment_status: string | null
+          shipping: number
+          shipping_address: Json | null
+          status: string
+          status_history: Json | null
+          subtotal: number
+          total: number
+          tracking_number: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          items?: Json
+          notes?: string | null
+          order_number: string
+          payment_method?: string | null
+          payment_status?: string | null
+          shipping?: number
+          shipping_address?: Json | null
+          status?: string
+          status_history?: Json | null
+          subtotal: number
+          total: number
+          tracking_number?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          items?: Json
+          notes?: string | null
+          order_number?: string
+          payment_method?: string | null
+          payment_status?: string | null
+          shipping?: number
+          shipping_address?: Json | null
+          status?: string
+          status_history?: Json | null
+          subtotal?: number
+          total?: number
+          tracking_number?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          category: string | null
+          colors: Json | null
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          images: string[] | null
+          in_stock: boolean | null
+          is_featured: boolean | null
+          is_upcoming: boolean | null
+          launch_date: string | null
+          name: string
+          original_price: number | null
+          price: number
+          rating: number | null
+          review_count: number | null
+          short_description: string | null
+          slug: string
+          specs: Json | null
+          stock_count: number | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          colors?: Json | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          images?: string[] | null
+          in_stock?: boolean | null
+          is_featured?: boolean | null
+          is_upcoming?: boolean | null
+          launch_date?: string | null
+          name: string
+          original_price?: number | null
+          price: number
+          rating?: number | null
+          review_count?: number | null
+          short_description?: string | null
+          slug: string
+          specs?: Json | null
+          stock_count?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          colors?: Json | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          images?: string[] | null
+          in_stock?: boolean | null
+          is_featured?: boolean | null
+          is_upcoming?: boolean | null
+          launch_date?: string | null
+          name?: string
+          original_price?: number | null
+          price?: number
+          rating?: number | null
+          review_count?: number | null
+          short_description?: string | null
+          slug?: string
+          specs?: Json | null
+          stock_count?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          content: string
+          created_at: string
+          helpful: number | null
+          id: string
+          images: string[] | null
+          is_approved: boolean | null
+          is_verified: boolean | null
+          moderation_notes: string | null
+          product_id: string
+          rating: number
+          reviewer_name: string
+          title: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          helpful?: number | null
+          id?: string
+          images?: string[] | null
+          is_approved?: boolean | null
+          is_verified?: boolean | null
+          moderation_notes?: string | null
+          product_id: string
+          rating: number
+          reviewer_name: string
+          title: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          helpful?: number | null
+          id?: string
+          images?: string[] | null
+          is_approved?: boolean | null
+          is_verified?: boolean | null
+          moderation_notes?: string | null
+          product_id?: string
+          rating?: number
+          reviewer_name?: string
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_settings: {
+        Row: {
+          announcement_active: boolean | null
+          announcement_text: string | null
+          hero_subtitle: string | null
+          hero_title: string | null
+          id: string
+          show_upcoming_banner: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          announcement_active?: boolean | null
+          announcement_text?: string | null
+          hero_subtitle?: string | null
+          hero_title?: string | null
+          id?: string
+          show_upcoming_banner?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          announcement_active?: boolean | null
+          announcement_text?: string | null
+          hero_subtitle?: string | null
+          hero_title?: string | null
+          id?: string
+          show_upcoming_banner?: boolean | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      support_tickets: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          priority: string | null
+          status: string
+          subject: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          priority?: string | null
+          status?: string
+          subject: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          priority?: string | null
+          status?: string
+          subject?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +464,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
