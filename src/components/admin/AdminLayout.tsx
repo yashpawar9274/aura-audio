@@ -37,7 +37,7 @@ export function AdminLayout() {
     if (!isLoading && !user) {
       navigate("/auth");
     } else if (!isLoading && user && !isAdmin) {
-      navigate("/");
+      navigate("/admin");
     }
   }, [user, isAdmin, isLoading, navigate]);
 
