@@ -1,8 +1,9 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ShoppingBag, Menu, X, Search, User } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useCartContext } from "@/hooks/useCart";
+import { useAuth } from "@/hooks/useAuth";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +18,9 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { itemCount } = useCartContext();
+  const { user } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -78,7 +81,12 @@ export function Header() {
             <Search className="h-5 w-5" />
           </Button>
 
-          <Button variant="ghost" size="icon" className="hidden md:flex">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="hidden md:flex"
+            onClick={() => navigate(user ? "/profile" : "/auth")}
+          >
             <User className="h-5 w-5" />
           </Button>
 
