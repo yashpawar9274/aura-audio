@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { useCartContext } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
@@ -26,6 +26,7 @@ interface ShippingAddress {
 
 export default function Checkout() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { items, subtotal, clearCart } = useCartContext();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -33,6 +34,55 @@ export default function Checkout() {
   const [paymentMethod, setPaymentMethod] = useState("cashfree");
   const [step, setStep] = useState<"shipping" | "payment" | "success">("shipping");
   const [orderId, setOrderId] = useState("");
+
+  // Check for payment verification on return from Cashfree
+  useEffect(() => {
+    const orderParam = searchParams.get("order");
+    const verifyParam = searchParams.get("verify");
+
+    if (orderParam && verifyParam === "true") {
+      verifyPayment(orderParam);
+    }
+  }, [searchParams]);
+
+  const verifyPayment = async (orderNumber: string) => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('cashfree-payment', {
+        body: {
+          action: 'verify_payment',
+          orderId: orderNumber,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data.paymentStatus === 'paid') {
+        setOrderId(orderNumber);
+        setStep("success");
+        clearCart();
+        toast({
+          title: "Payment Successful!",
+          description: `Your order #${orderNumber} has been confirmed.`,
+        });
+      } else {
+        toast({
+          title: "Payment Pending",
+          description: "Your payment is still being processed. Please check back later.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Payment verification error:", error);
+      toast({
+        title: "Verification Failed",
+        description: "Could not verify payment. Please contact support.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   const [address, setAddress] = useState<ShippingAddress>({
     name: "",
@@ -72,6 +122,25 @@ export default function Checkout() {
     );
   };
 
+  const createCashfreeOrder = async (orderNumber: string) => {
+    const { data, error } = await supabase.functions.invoke('cashfree-payment', {
+      body: {
+        action: 'create_order',
+        orderId: orderNumber,
+        orderAmount: finalTotal / 100, // Convert paise to rupees
+        customerDetails: {
+          email: address.email,
+          phone: address.phone,
+          name: address.name,
+        },
+        returnUrl: `${window.location.origin}/checkout?order=${orderNumber}&verify=true`,
+      },
+    });
+
+    if (error) throw error;
+    return data;
+  };
+
   const handlePlaceOrder = async () => {
     if (!isAddressValid()) {
       toast({
@@ -95,34 +164,60 @@ export default function Checkout() {
         color: item.selectedColor,
       }));
 
+      // Create order in database first
       const { error } = await supabase.from("orders").insert([{
         order_number: orderNumber,
         user_id: user?.id || null,
         email: address.email,
-        items: orderItems,
+        items: JSON.parse(JSON.stringify(orderItems)),
         subtotal: subtotal,
         shipping: shippingCost,
         total: finalTotal,
-        shipping_address: address as unknown as Record<string, unknown>,
-        status: "confirmed",
+        shipping_address: JSON.parse(JSON.stringify(address)),
+        status: "pending",
         payment_method: paymentMethod,
-        payment_status: paymentMethod === "cod" ? "pending" : "paid",
-        status_history: [
+        payment_status: "pending",
+        status_history: JSON.parse(JSON.stringify([
           { status: "pending", timestamp: new Date().toISOString() },
-          { status: "confirmed", timestamp: new Date().toISOString() },
-        ],
+        ])),
       }]);
 
       if (error) throw error;
 
-      setOrderId(orderNumber);
-      setStep("success");
-      clearCart();
+      if (paymentMethod === "cashfree") {
+        // Create Cashfree order and redirect to payment
+        const cashfreeData = await createCashfreeOrder(orderNumber);
+        
+        if (cashfreeData.success && cashfreeData.paymentSessionId) {
+          // Redirect to Cashfree payment page
+          const paymentUrl = `https://sandbox.cashfree.com/pg/view/sessions/${cashfreeData.paymentSessionId}`;
+          window.location.href = paymentUrl;
+          return;
+        } else {
+          throw new Error('Failed to create payment session');
+        }
+      } else {
+        // COD - mark as confirmed
+        await supabase
+          .from("orders")
+          .update({ 
+            status: "confirmed",
+            status_history: JSON.parse(JSON.stringify([
+              { status: "pending", timestamp: new Date().toISOString() },
+              { status: "confirmed", timestamp: new Date().toISOString() },
+            ])),
+          })
+          .eq("order_number", orderNumber);
 
-      toast({
-        title: "Order Placed Successfully!",
-        description: `Your order #${orderNumber} has been confirmed.`,
-      });
+        setOrderId(orderNumber);
+        setStep("success");
+        clearCart();
+
+        toast({
+          title: "Order Placed Successfully!",
+          description: `Your order #${orderNumber} has been confirmed.`,
+        });
+      }
     } catch (error) {
       console.error("Order error:", error);
       toast({
