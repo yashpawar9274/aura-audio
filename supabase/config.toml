@@ -1,1 +1,4 @@
 project_id = "ydjveelagucmrrmvenbx"
+
+[functions.cashfree-payment]
+verify_jwt = false
