@@ -1,8 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { Layout } from "@/components/layout/Layout";
 import { ProductCard } from "@/components/products/ProductCard";
-import { products, Product } from "@/data/products";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,18 +12,85 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Search, X, Loader2 } from "lucide-react";
 
 type SortOption = "popular" | "newest" | "price-asc" | "price-desc";
 type FilterCategory = "all" | "pro" | "standard" | "premium" | "accessories";
 type StockFilter = "all" | "in-stock" | "upcoming";
 
+interface DBProduct {
+  id: string;
+  name: string;
+  slug: string;
+  short_description: string | null;
+  description: string | null;
+  price: number;
+  original_price: number | null;
+  currency: string;
+  images: string[] | null;
+  colors: unknown;
+  rating: number | null;
+  review_count: number | null;
+  in_stock: boolean | null;
+  stock_count: number | null;
+  is_upcoming: boolean | null;
+  launch_date: string | null;
+  is_featured: boolean | null;
+  specs: unknown;
+  category: string | null;
+  created_at: string;
+}
+
+const transformProduct = (p: DBProduct) => ({
+  id: p.id,
+  name: p.name,
+  slug: p.slug,
+  shortDescription: p.short_description || "",
+  description: p.description || "",
+  price: p.price,
+  originalPrice: p.original_price || undefined,
+  currency: p.currency,
+  images: p.images || [],
+  colors: Array.isArray(p.colors) ? p.colors : [],
+  rating: p.rating || 0,
+  reviewCount: p.review_count || 0,
+  inStock: p.in_stock ?? true,
+  stockCount: p.stock_count || 0,
+  isUpcoming: p.is_upcoming ?? false,
+  launchDate: p.launch_date || undefined,
+  isFeatured: p.is_featured ?? false,
+  specs: Array.isArray(p.specs) ? p.specs : [],
+  category: p.category || "",
+  createdAt: p.created_at,
+});
+
 const Products = () => {
+  const [products, setProducts] = useState<ReturnType<typeof transformProduct>[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("popular");
   const [category, setCategory] = useState<FilterCategory>("all");
   const [stockFilter, setStockFilter] = useState<StockFilter>("all");
-  const [showFilters, setShowFilters] = useState(false);
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setProducts((data || []).map(transformProduct));
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const filteredProducts = useMemo(() => {
     let result = [...products];
@@ -70,13 +137,12 @@ const Products = () => {
     }
 
     return result;
-  }, [searchQuery, sortBy, category, stockFilter]);
+  }, [products, searchQuery, sortBy, category, stockFilter]);
 
   const categories: { value: FilterCategory; label: string }[] = [
     { value: "all", label: "All Products" },
     { value: "pro", label: "AirPods Pro" },
     { value: "standard", label: "AirPods" },
-    { value: "premium", label: "AirPods Max" },
     { value: "accessories", label: "Accessories" },
   ];
 
@@ -194,7 +260,11 @@ const Products = () => {
             </div>
 
             {/* Products Grid */}
-            {filteredProducts.length > 0 ? (
+            {isLoading ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : filteredProducts.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {filteredProducts.map((product, index) => (
                   <ProductCard

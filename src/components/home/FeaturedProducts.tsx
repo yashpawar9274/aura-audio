@@ -1,11 +1,96 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
-import { getFeaturedProducts } from "@/data/products";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { ProductCard } from "@/components/products/ProductCard";
 import { Button } from "@/components/ui/button";
 
+interface DBProduct {
+  id: string;
+  name: string;
+  slug: string;
+  short_description: string | null;
+  description: string | null;
+  price: number;
+  original_price: number | null;
+  currency: string;
+  images: string[] | null;
+  colors: unknown;
+  rating: number | null;
+  review_count: number | null;
+  in_stock: boolean | null;
+  stock_count: number | null;
+  is_upcoming: boolean | null;
+  launch_date: string | null;
+  is_featured: boolean | null;
+  specs: unknown;
+  category: string | null;
+}
+
+// Transform DB product to match the Product interface
+const transformProduct = (p: DBProduct) => ({
+  id: p.id,
+  name: p.name,
+  slug: p.slug,
+  shortDescription: p.short_description || "",
+  description: p.description || "",
+  price: p.price,
+  originalPrice: p.original_price || undefined,
+  currency: p.currency,
+  images: p.images || [],
+  colors: Array.isArray(p.colors) ? p.colors : [],
+  rating: p.rating || 0,
+  reviewCount: p.review_count || 0,
+  inStock: p.in_stock ?? true,
+  stockCount: p.stock_count || 0,
+  isUpcoming: p.is_upcoming ?? false,
+  launchDate: p.launch_date || undefined,
+  isFeatured: p.is_featured ?? false,
+  specs: Array.isArray(p.specs) ? p.specs : [],
+  category: p.category || "",
+});
+
 export function FeaturedProducts() {
-  const featuredProducts = getFeaturedProducts();
+  const [products, setProducts] = useState<ReturnType<typeof transformProduct>[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchFeaturedProducts();
+  }, []);
+
+  const fetchFeaturedProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("is_featured", true)
+        .eq("is_upcoming", false)
+        .limit(6);
+
+      if (error) throw error;
+      setProducts((data || []).map(transformProduct));
+    } catch (error) {
+      console.error("Error fetching featured products:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <section className="py-24 bg-background">
+        <div className="container mx-auto px-6">
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (products.length === 0) {
+    return null;
+  }
 
   return (
     <section className="py-24 bg-background">
@@ -30,7 +115,7 @@ export function FeaturedProducts() {
 
         {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {featuredProducts.map((product, index) => (
+          {products.map((product, index) => (
             <ProductCard
               key={product.id}
               product={product}

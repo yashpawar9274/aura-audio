@@ -178,13 +178,15 @@ const Cart = () => {
                         <span className="font-bold text-xl">{formatPrice(total)}</span>
                       </div>
 
-                      <Button variant="cart" size="lg" className="w-full h-12">
-                        Proceed to Checkout
-                        <ArrowRight className="ml-2 h-5 w-5" />
-                      </Button>
+                      <Link to="/checkout">
+                        <Button variant="cart" size="lg" className="w-full h-12">
+                          Proceed to Checkout
+                          <ArrowRight className="ml-2 h-5 w-5" />
+                        </Button>
+                      </Link>
 
                       <p className="text-xs text-muted-foreground text-center mt-4">
-                        Secure checkout powered by Stripe
+                        Secure checkout powered by Cashfree
                       </p>
                     </div>
                   </div>
