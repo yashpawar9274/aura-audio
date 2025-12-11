@@ -20,7 +20,7 @@ const footerLinks = {
   ],
   company: [
     { label: "About Us", href: "/about" },
-    { label: "Privacy Policy", href: "/privacy" },
+    { label: "Privacy Policy", href: "/privacy-policy" },
     { label: "Terms of Service", href: "/terms" },
   ],
 };
