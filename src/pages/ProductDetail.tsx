@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Layout } from "@/components/layout/Layout";
 import { ProductCard } from "@/components/products/ProductCard";
+import { ProductReviews } from "@/components/reviews/ProductReviews";
 import { Button } from "@/components/ui/button";
 import { useCartContext } from "@/hooks/useCart";
 import { supabase } from "@/integrations/supabase/client";
@@ -529,16 +530,9 @@ const ProductDetail = () => {
             </div>
 
             {/* Reviews Section */}
-            {reviews.length > 0 && (
-              <section className="mt-20">
-                <h2 className="text-2xl font-bold mb-8">Customer Reviews</h2>
-                <div className="grid gap-6 md:grid-cols-2">
-                  {reviews.map((review) => (
-                    <ReviewCard key={review.id} review={review} />
-                  ))}
-                </div>
-              </section>
-            )}
+            <section className="mt-20">
+              <ProductReviews productId={product.id} productName={product.name} />
+            </section>
 
             {/* Related Products */}
             {relatedProducts.length > 0 && (
