@@ -10,13 +10,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
-import { Search, Loader2, Eye } from "lucide-react";
+import { Search, Loader2, Eye, Trash2, Edit2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Order {
   id: string;
@@ -24,9 +36,14 @@ interface Order {
   email: string;
   status: string;
   payment_status: string | null;
+  payment_method: string | null;
   total: number;
+  subtotal: number;
+  shipping: number;
   items: any;
   shipping_address: any;
+  tracking_number: string | null;
+  notes: string | null;
   created_at: string;
 }
 
@@ -40,15 +57,33 @@ const orderStatuses = [
   "cancelled",
 ];
 
+const paymentStatuses = ["pending", "paid", "failed", "refunded"];
+
 export function AdminOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+  const [deleteOrder, setDeleteOrder] = useState<Order | null>(null);
 
   useEffect(() => {
     fetchOrders();
+    
+    // Real-time subscription
+    const channel = supabase
+      .channel('orders_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'orders' },
+        () => fetchOrders()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchOrders = async () => {
@@ -77,7 +112,45 @@ export function AdminOrders() {
 
       if (error) throw error;
       toast({ title: "Success", description: `Order status updated to ${newStatus}` });
-      fetchOrders();
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  };
+
+  const handleSaveOrder = async () => {
+    if (!editingOrder) return;
+    
+    try {
+      const { error } = await supabase
+        .from("orders")
+        .update({
+          status: editingOrder.status,
+          payment_status: editingOrder.payment_status,
+          tracking_number: editingOrder.tracking_number,
+          notes: editingOrder.notes,
+        })
+        .eq("id", editingOrder.id);
+
+      if (error) throw error;
+      toast({ title: "Success", description: "Order updated successfully" });
+      setEditingOrder(null);
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  };
+
+  const handleDeleteOrder = async () => {
+    if (!deleteOrder) return;
+    
+    try {
+      const { error } = await supabase
+        .from("orders")
+        .delete()
+        .eq("id", deleteOrder.id);
+
+      if (error) throw error;
+      toast({ title: "Success", description: "Order deleted successfully" });
+      setDeleteOrder(null);
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     }
@@ -134,7 +207,7 @@ export function AdminOrders() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Orders</h1>
-        <p className="text-muted-foreground mt-1">Manage and track customer orders</p>
+        <p className="text-muted-foreground mt-1">Manage and track customer orders (Real-time updates)</p>
       </div>
 
       {/* Filters */}
@@ -217,6 +290,8 @@ export function AdminOrders() {
                       <span className={`px-2 py-0.5 text-xs rounded-full capitalize ${
                         order.payment_status === "paid" 
                           ? "bg-green-500/10 text-green-600"
+                          : order.payment_status === "failed"
+                          ? "bg-red-500/10 text-red-600"
                           : "bg-yellow-500/10 text-yellow-600"
                       }`}>
                         {order.payment_status}
@@ -227,13 +302,28 @@ export function AdminOrders() {
                       {formatDate(order.created_at)}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex justify-end">
+                      <div className="flex justify-end gap-2">
                         <Button
                           variant="ghost"
                           size="iconSm"
                           onClick={() => setSelectedOrder(order)}
                         >
                           <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="iconSm"
+                          onClick={() => setEditingOrder(order)}
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="iconSm"
+                          onClick={() => setDeleteOrder(order)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </td>
@@ -270,14 +360,35 @@ export function AdminOrders() {
                   <p className="text-sm text-muted-foreground">Total</p>
                   <p className="font-bold text-lg">{formatPrice(selectedOrder.total)}</p>
                 </div>
+                {selectedOrder.tracking_number && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Tracking Number</p>
+                    <p className="font-mono">{selectedOrder.tracking_number}</p>
+                  </div>
+                )}
+                {selectedOrder.notes && (
+                  <div className="col-span-2">
+                    <p className="text-sm text-muted-foreground">Notes</p>
+                    <p>{selectedOrder.notes}</p>
+                  </div>
+                )}
               </div>
 
               {selectedOrder.shipping_address && (
                 <div>
                   <p className="text-sm text-muted-foreground mb-2">Shipping Address</p>
-                  <p className="text-sm bg-secondary/30 p-3 rounded-lg">
-                    {JSON.stringify(selectedOrder.shipping_address, null, 2)}
-                  </p>
+                  <div className="text-sm bg-secondary/30 p-3 rounded-lg">
+                    {typeof selectedOrder.shipping_address === 'object' ? (
+                      <>
+                        <p>{selectedOrder.shipping_address.name}</p>
+                        <p>{selectedOrder.shipping_address.address}</p>
+                        <p>{selectedOrder.shipping_address.city}, {selectedOrder.shipping_address.state} {selectedOrder.shipping_address.pincode}</p>
+                        <p>{selectedOrder.shipping_address.phone}</p>
+                      </>
+                    ) : (
+                      <pre>{JSON.stringify(selectedOrder.shipping_address, null, 2)}</pre>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -296,6 +407,97 @@ export function AdminOrders() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Edit Order Dialog */}
+      <Dialog open={!!editingOrder} onOpenChange={() => setEditingOrder(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit Order</DialogTitle>
+          </DialogHeader>
+          {editingOrder && (
+            <div className="space-y-4 mt-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Order Status</label>
+                <Select
+                  value={editingOrder.status}
+                  onValueChange={(value) => setEditingOrder({ ...editingOrder, status: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {orderStatuses.map((status) => (
+                      <SelectItem key={status} value={status} className="capitalize">
+                        {status.replace("_", " ")}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Payment Status</label>
+                <Select
+                  value={editingOrder.payment_status || "pending"}
+                  onValueChange={(value) => setEditingOrder({ ...editingOrder, payment_status: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {paymentStatuses.map((status) => (
+                      <SelectItem key={status} value={status} className="capitalize">
+                        {status}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Tracking Number</label>
+                <Input
+                  value={editingOrder.tracking_number || ""}
+                  onChange={(e) => setEditingOrder({ ...editingOrder, tracking_number: e.target.value })}
+                  placeholder="Enter tracking number"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Notes</label>
+                <Textarea
+                  value={editingOrder.notes || ""}
+                  onChange={(e) => setEditingOrder({ ...editingOrder, notes: e.target.value })}
+                  placeholder="Add notes about this order"
+                  rows={3}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingOrder(null)}>Cancel</Button>
+            <Button onClick={handleSaveOrder}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteOrder} onOpenChange={() => setDeleteOrder(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Order</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete order <strong>{deleteOrder?.order_number}</strong>? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteOrder} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

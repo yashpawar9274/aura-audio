@@ -236,6 +236,9 @@ export type Database = {
         Row: {
           announcement_active: boolean | null
           announcement_text: string | null
+          coupon_active: boolean | null
+          coupon_code: string | null
+          coupon_discount: number | null
           hero_subtitle: string | null
           hero_title: string | null
           id: string
@@ -245,6 +248,9 @@ export type Database = {
         Insert: {
           announcement_active?: boolean | null
           announcement_text?: string | null
+          coupon_active?: boolean | null
+          coupon_code?: string | null
+          coupon_discount?: number | null
           hero_subtitle?: string | null
           hero_title?: string | null
           id?: string
@@ -254,6 +260,9 @@ export type Database = {
         Update: {
           announcement_active?: boolean | null
           announcement_text?: string | null
+          coupon_active?: boolean | null
+          coupon_code?: string | null
+          coupon_discount?: number | null
           hero_subtitle?: string | null
           hero_title?: string | null
           id?: string
