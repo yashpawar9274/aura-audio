@@ -44,7 +44,7 @@ export function Header() {
       <nav className="container mx-auto px-6 h-20 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="text-2xl font-bold tracking-tight hover:opacity-80 transition-opacity">
-          <span className="text-foreground">AURAPODS</span>
+          <span className="text-foreground">SOUNDPODS</span>
           <span className="text-muted-foreground font-light ml-1">store</span>
         </Link>
 
