@@ -26,7 +26,7 @@ const footerLinks = {
 };
 
 const socialLinks = [
-  { icon: Instagram, href: "#", label: "Instagram" },
+  { icon: Instagram, href: "https://www.instagram.com/theitsash", label: "Instagram" },
   { icon: Twitter, href: "#", label: "Twitter" },
   { icon: Facebook, href: "#", label: "Facebook" },
   { icon: Youtube, href: "#", label: "YouTube" },
