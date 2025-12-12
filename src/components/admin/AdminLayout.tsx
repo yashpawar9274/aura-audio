@@ -14,6 +14,9 @@ import {
   X,
   ChevronRight,
   Loader2,
+  Bell,
+  Gift,
+  Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +26,9 @@ const navItems = [
   { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
   { href: "/admin/reviews", label: "Reviews", icon: MessageSquare },
   { href: "/admin/users", label: "Users", icon: Users },
+  { href: "/admin/notify", label: "Notify Me", icon: Bell },
+  { href: "/admin/referrals", label: "Referrals", icon: Gift },
+  { href: "/admin/warranty", label: "Warranty Cards", icon: Shield },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 

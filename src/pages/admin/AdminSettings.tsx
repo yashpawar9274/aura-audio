@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Save, Tag, Megaphone, Layout } from "lucide-react";
+import { Loader2, Save, Tag, Megaphone, Layout, Phone, Mail, MapPin, Clock } from "lucide-react";
 
 interface SiteSettings {
   id: string;
@@ -17,6 +17,10 @@ interface SiteSettings {
   coupon_code: string;
   coupon_discount: number;
   coupon_active: boolean;
+  contact_email: string;
+  contact_phone: string;
+  contact_address: string;
+  business_hours: string;
 }
 
 export function AdminSettings() {
@@ -76,6 +80,10 @@ export function AdminSettings() {
           coupon_code: settings.coupon_code,
           coupon_discount: settings.coupon_discount,
           coupon_active: settings.coupon_active,
+          contact_email: settings.contact_email,
+          contact_phone: settings.contact_phone,
+          contact_address: settings.contact_address,
+          business_hours: settings.business_hours,
         });
 
       if (error) throw error;
@@ -237,6 +245,63 @@ export function AdminSettings() {
                 </p>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Contact Details */}
+        <div className="bg-card rounded-2xl border border-border/50 p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <Phone className="h-5 w-5 text-primary" />
+            <h2 className="text-xl font-semibold">Contact Details</h2>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  <Mail className="inline h-4 w-4 mr-1" />
+                  Email
+                </label>
+                <Input
+                  value={settings?.contact_email || ""}
+                  onChange={(e) => setSettings({ ...settings!, contact_email: e.target.value })}
+                  placeholder="support@example.com"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  <Phone className="inline h-4 w-4 mr-1" />
+                  Phone
+                </label>
+                <Input
+                  value={settings?.contact_phone || ""}
+                  onChange={(e) => setSettings({ ...settings!, contact_phone: e.target.value })}
+                  placeholder="+91 1800-123-4567"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                <MapPin className="inline h-4 w-4 mr-1" />
+                Address
+              </label>
+              <Input
+                value={settings?.contact_address || ""}
+                onChange={(e) => setSettings({ ...settings!, contact_address: e.target.value })}
+                placeholder="123 Street, City, State, PIN"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                <Clock className="inline h-4 w-4 mr-1" />
+                Business Hours
+              </label>
+              <Input
+                value={settings?.business_hours || ""}
+                onChange={(e) => setSettings({ ...settings!, business_hours: e.target.value })}
+                placeholder="Mon - Sat: 9:00 AM - 8:00 PM"
+              />
+            </div>
           </div>
         </div>
 

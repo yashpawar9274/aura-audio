@@ -13,6 +13,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, CreditCard, Wallet, ShoppingBag, ArrowLeft, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { CouponCode } from "@/components/checkout/CouponCode";
 
 interface ShippingAddress {
   name: string;
@@ -34,6 +35,8 @@ export default function Checkout() {
   const [paymentMethod, setPaymentMethod] = useState("cashfree");
   const [step, setStep] = useState<"shipping" | "payment" | "success">("shipping");
   const [orderId, setOrderId] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
+  const [couponDiscount, setCouponDiscount] = useState(0);
 
   // Check for payment verification on return from Cashfree
   useEffect(() => {
@@ -95,7 +98,18 @@ export default function Checkout() {
   });
 
   const shippingCost = subtotal >= 500000 ? 0 : 9900; // Free shipping over ₹5000
-  const finalTotal = subtotal + shippingCost;
+  const discountAmount = Math.round((subtotal * couponDiscount) / 100);
+  const finalTotal = subtotal - discountAmount + shippingCost;
+
+  const handleApplyCoupon = (discount: number, code: string) => {
+    setCouponDiscount(discount);
+    setAppliedCoupon(code);
+  };
+
+  const handleRemoveCoupon = () => {
+    setCouponDiscount(0);
+    setAppliedCoupon(null);
+  };
 
   const generateOrderNumber = () => {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -467,12 +481,25 @@ export default function Checkout() {
 
                   <Separator />
 
+                  {/* Coupon Code */}
+                  <CouponCode
+                    onApply={handleApplyCoupon}
+                    onRemove={handleRemoveCoupon}
+                    appliedCode={appliedCoupon}
+                  />
+
                   {/* Totals */}
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Subtotal</span>
                       <span>₹{(subtotal / 100).toLocaleString()}</span>
                     </div>
+                    {discountAmount > 0 && (
+                      <div className="flex justify-between text-green-600">
+                        <span>Discount ({couponDiscount}%)</span>
+                        <span>-₹{(discountAmount / 100).toLocaleString()}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Shipping</span>
                       <span>

@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      notify_me: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string | null
+          notified: boolean | null
+          notified_at: string | null
+          product_id: string | null
+          product_name: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name?: string | null
+          notified?: boolean | null
+          notified_at?: string | null
+          product_id?: string | null
+          product_name?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string | null
+          notified?: boolean | null
+          notified_at?: string | null
+          product_id?: string | null
+          product_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notify_me_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           created_at: string
@@ -173,6 +214,45 @@ export type Database = {
         }
         Relationships: []
       }
+      referrals: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          referral_code: string
+          referred_email: string
+          referred_name: string | null
+          referrer_email: string
+          referrer_name: string | null
+          reward_amount: number | null
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          referral_code: string
+          referred_email: string
+          referred_name?: string | null
+          referrer_email: string
+          referrer_name?: string | null
+          reward_amount?: number | null
+          status?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          referral_code?: string
+          referred_email?: string
+          referred_name?: string | null
+          referrer_email?: string
+          referrer_name?: string | null
+          reward_amount?: number | null
+          status?: string
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           content: string
@@ -236,6 +316,10 @@ export type Database = {
         Row: {
           announcement_active: boolean | null
           announcement_text: string | null
+          business_hours: string | null
+          contact_address: string | null
+          contact_email: string | null
+          contact_phone: string | null
           coupon_active: boolean | null
           coupon_code: string | null
           coupon_discount: number | null
@@ -248,6 +332,10 @@ export type Database = {
         Insert: {
           announcement_active?: boolean | null
           announcement_text?: string | null
+          business_hours?: string | null
+          contact_address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
           coupon_active?: boolean | null
           coupon_code?: string | null
           coupon_discount?: number | null
@@ -260,6 +348,10 @@ export type Database = {
         Update: {
           announcement_active?: boolean | null
           announcement_text?: string | null
+          business_hours?: string | null
+          contact_address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
           coupon_active?: boolean | null
           coupon_code?: string | null
           coupon_discount?: number | null
@@ -330,6 +422,65 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      warranty_cards: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone: string | null
+          id: string
+          notes: string | null
+          order_id: string | null
+          product_name: string
+          product_serial: string | null
+          purchase_date: string
+          sent_at: string | null
+          warranty_end_date: string
+          warranty_period: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone?: string | null
+          id?: string
+          notes?: string | null
+          order_id?: string | null
+          product_name: string
+          product_serial?: string | null
+          purchase_date?: string
+          sent_at?: string | null
+          warranty_end_date: string
+          warranty_period?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string | null
+          id?: string
+          notes?: string | null
+          order_id?: string | null
+          product_name?: string
+          product_serial?: string | null
+          purchase_date?: string
+          sent_at?: string | null
+          warranty_end_date?: string
+          warranty_period?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "warranty_cards_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

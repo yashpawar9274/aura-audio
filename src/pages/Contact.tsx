@@ -1,36 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { Mail, Phone, MapPin, Clock, Send } from "lucide-react";
+import { Mail, Phone, MapPin, Clock, Send, Loader2 } from "lucide-react";
 
-const contactInfo = [
-  {
-    icon: Mail,
-    title: "Email",
-    value: "support@airpodsstore.in",
-    href: "mailto:support@airpodsstore.in",
-  },
-  {
-    icon: Phone,
-    title: "Phone",
-    value: "+91 1800-123-4567",
-    href: "tel:+911800123456",
-  },
-  {
-    icon: MapPin,
-    title: "Address",
-    value: "123 Tech Park, Bangalore, India 560001",
-  },
-  {
-    icon: Clock,
-    title: "Business Hours",
-    value: "Mon - Sat: 9:00 AM - 8:00 PM",
-  },
-];
+interface ContactInfo {
+  email: string;
+  phone: string;
+  address: string;
+  hours: string;
+}
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -40,21 +23,79 @@ const Contact = () => {
     message: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [contactInfo, setContactInfo] = useState<ContactInfo>({
+    email: "support@airpodsstore.in",
+    phone: "+91 1800-123-4567",
+    address: "123 Tech Park, Bangalore, India 560001",
+    hours: "Mon - Sat: 9:00 AM - 8:00 PM",
+  });
+
+  useEffect(() => {
+    fetchContactInfo();
+
+    const channel = supabase
+      .channel('contact_settings')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'site_settings' }, () => {
+        fetchContactInfo();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const fetchContactInfo = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("site_settings")
+        .select("contact_email, contact_phone, contact_address, business_hours")
+        .eq("id", "main")
+        .maybeSingle();
+
+      if (error) throw error;
+      if (data) {
+        setContactInfo({
+          email: data.contact_email || "support@airpodsstore.in",
+          phone: data.contact_phone || "+91 1800-123-4567",
+          address: data.contact_address || "123 Tech Park, Bangalore, India 560001",
+          hours: data.business_hours || "Mon - Sat: 9:00 AM - 8:00 PM",
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching contact info:", error);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      const { error } = await supabase.from("support_tickets").insert({
+        name: formData.name,
+        email: formData.email,
+        subject: formData.subject,
+        message: formData.message,
+      });
 
-    toast({
-      title: "Message sent!",
-      description: "We'll get back to you within 24 hours.",
-    });
+      if (error) throw error;
 
-    setFormData({ name: "", email: "", subject: "", message: "" });
-    setIsSubmitting(false);
+      toast({
+        title: "Message sent!",
+        description: "We'll get back to you within 24 hours.",
+      });
+
+      setFormData({ name: "", email: "", subject: "", message: "" });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Could not send message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (
@@ -65,6 +106,31 @@ const Contact = () => {
       [e.target.name]: e.target.value,
     }));
   };
+
+  const contactItems = [
+    {
+      icon: Mail,
+      title: "Email",
+      value: contactInfo.email,
+      href: `mailto:${contactInfo.email}`,
+    },
+    {
+      icon: Phone,
+      title: "Phone",
+      value: contactInfo.phone,
+      href: `tel:${contactInfo.phone.replace(/\s/g, "")}`,
+    },
+    {
+      icon: MapPin,
+      title: "Address",
+      value: contactInfo.address,
+    },
+    {
+      icon: Clock,
+      title: "Business Hours",
+      value: contactInfo.hours,
+    },
+  ];
 
   return (
     <>
@@ -94,7 +160,7 @@ const Contact = () => {
               {/* Contact Info */}
               <div className="lg:col-span-2 space-y-6">
                 <h2 className="text-2xl font-semibold mb-6">Contact Information</h2>
-                {contactInfo.map((info) => (
+                {contactItems.map((info) => (
                   <div key={info.title} className="flex items-start gap-4">
                     <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center shrink-0">
                       <info.icon className="h-5 w-5" />
@@ -122,7 +188,9 @@ const Contact = () => {
                     Check out our FAQ section for answers to common questions about
                     orders, shipping, and returns.
                   </p>
-                  <Button variant="outline">View FAQ</Button>
+                  <Button variant="outline" asChild>
+                    <a href="/faq">View FAQ</a>
+                  </Button>
                 </div>
               </div>
 
@@ -213,7 +281,10 @@ const Contact = () => {
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
-                      "Sending..."
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Sending...
+                      </>
                     ) : (
                       <>
                         Send Message
