@@ -29,6 +29,10 @@ import { AdminOrders } from "./pages/admin/AdminOrders";
 import { AdminReviews } from "./pages/admin/AdminReviews";
 import { AdminUsers } from "./pages/admin/AdminUsers";
 import { AdminSettings } from "./pages/admin/AdminSettings";
+import { AdminNotifyMe } from "./pages/admin/AdminNotifyMe";
+import { AdminReferrals } from "./pages/admin/AdminReferrals";
+import Notify from "./pages/Notify";
+import Refer from "./pages/Refer";
 
 const queryClient = new QueryClient();
 
