@@ -10,7 +10,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
-import { Search, Loader2, Shield, User } from "lucide-react";
+import { Search, Loader2, Shield, User, Plus, Edit2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 interface UserProfile {
@@ -25,6 +34,12 @@ export function AdminUsers() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [addOpen, setAddOpen] = useState(false);
+  const [newUserEmail, setNewUserEmail] = useState("");
+  const [newUserName, setNewUserName] = useState("");
+  const [newUserRole, setNewUserRole] = useState("user");
+  const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -96,6 +111,57 @@ export function AdminUsers() {
     }
   };
 
+  const createStaff = async () => {
+    if (!newUserEmail) {
+      toast({ title: "Missing Email", description: "Please provide an email.", variant: "destructive" });
+      return;
+    }
+
+    try {
+      const id = crypto.randomUUID();
+      const { error } = await supabase.from("profiles").insert({
+        id,
+        email: newUserEmail,
+        full_name: newUserName || null,
+        created_at: new Date().toISOString(),
+      });
+
+      if (error) throw error;
+
+      const { error: roleErr } = await supabase.from("user_roles").insert({ user_id: id, role: newUserRole });
+      if (roleErr) throw roleErr;
+
+      toast({ title: "Staff Created", description: "New staff added to profiles." });
+      setAddOpen(false);
+      setNewUserEmail("");
+      setNewUserName("");
+      setNewUserRole("user");
+      fetchUsers();
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message || String(error), variant: "destructive" });
+    }
+  };
+
+  const startEdit = (user: UserProfile) => {
+    setEditingUser(user);
+    setEditOpen(true);
+  };
+
+  const saveEdit = async () => {
+    if (!editingUser) return;
+    try {
+      const { error } = await supabase.from("profiles").update({ full_name: editingUser.full_name }).eq("id", editingUser.id);
+      if (error) throw error;
+      if (editingUser.role) await updateUserRole(editingUser.id, editingUser.role as "admin" | "user");
+      setEditOpen(false);
+      setEditingUser(null);
+      fetchUsers();
+      toast({ title: "Updated", description: "User updated successfully." });
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  };
+
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString("en-IN", {
       year: "numeric",
@@ -133,6 +199,45 @@ export function AdminUsers() {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-10"
         />
+        <div className="mt-4">
+          <Dialog open={addOpen} onOpenChange={setAddOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm" className="mt-3">
+                <Plus className="h-4 w-4 mr-2" /> Add Staff
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add Staff Member</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Email *</label>
+                  <Input value={newUserEmail} onChange={(e) => setNewUserEmail(e.target.value)} required />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Full Name</label>
+                  <Input value={newUserName} onChange={(e) => setNewUserName(e.target.value)} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Role</label>
+                  <Select value={newUserRole} onValueChange={setNewUserRole}>
+                    <SelectTrigger className="w-40">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="user">User</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex justify-end">
+                  <Button onClick={createStaff}>Create</Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {/* Users Table */}
@@ -187,7 +292,7 @@ export function AdminUsers() {
                       {formatDate(user.created_at)}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex justify-end">
+                      <div className="flex items-center justify-end gap-2">
                         <Select
                           value={user.role}
                           onValueChange={(value) => updateUserRole(user.id, value as "admin" | "user")}
@@ -200,6 +305,9 @@ export function AdminUsers() {
                             <SelectItem value="admin">Admin</SelectItem>
                           </SelectContent>
                         </Select>
+                        <Button variant="ghost" size="icon" onClick={() => startEdit(user)}>
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </td>
                   </tr>
@@ -209,6 +317,37 @@ export function AdminUsers() {
           </table>
         </div>
       </div>
+      {/* Edit Dialog */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit User</DialogTitle>
+          </DialogHeader>
+          {editingUser && (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Full Name</label>
+                <Input value={editingUser.full_name} onChange={(e) => setEditingUser({ ...editingUser, full_name: e.target.value })} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Role</label>
+                <Select value={editingUser.role} onValueChange={(v) => setEditingUser({ ...editingUser, role: v })}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="user">User</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex justify-end">
+                <Button onClick={saveEdit}>Save</Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

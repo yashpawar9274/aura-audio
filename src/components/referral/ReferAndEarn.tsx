@@ -29,21 +29,31 @@ export function ReferAndEarn() {
 
     setIsLoading(true);
     try {
-      const code = generateCode();
-      
-      const { error } = await supabase.from("referrals").insert({
-        referrer_email: referrerEmail,
-        referrer_name: referrerName || null,
-        referred_email: "", // Will be filled when someone uses the code
-        referral_code: code,
-        status: "active",
-      });
+      // Check for existing referral for this email
+      const { data: existing } = await supabase.from("referrals").select("*").eq("referrer_email", referrerEmail).maybeSingle();
+      if (existing && existing.referral_code) {
+        setReferralCode(existing.referral_code);
+        setStep("code");
+        toast({ title: "Found", description: "Existing referral code loaded." });
+      } else {
+        const code = generateCode();
+        const payload = {
+          referrer_email: referrerEmail,
+          referrer_name: referrerName || null,
+          referred_email: "",
+          referred_name: "",
+          referral_code: code,
+          status: "active",
+          reward_amount: 99,
+        };
 
-      if (error) throw error;
+        const { error } = await supabase.from("referrals").insert(payload);
+        if (error) throw error;
 
-      setReferralCode(code);
-      setStep("code");
-      toast({ title: "Success!", description: "Your referral code has been generated!" });
+        setReferralCode(code);
+        setStep("code");
+        toast({ title: "Success!", description: "Your referral code has been generated." });
+      }
     } catch (error: any) {
       console.error("Error creating referral:", error);
       toast({ title: "Error", description: "Could not generate code. Please try again.", variant: "destructive" });
@@ -53,7 +63,8 @@ export function ReferAndEarn() {
   };
 
   const copyCode = () => {
-    navigator.clipboard.writeText(referralCode);
+    const url = `${window.location.origin}/?ref=${referralCode}`;
+    navigator.clipboard.writeText(url);
     setCopied(true);
     toast({ title: "Copied!", description: "Referral code copied to clipboard" });
     setTimeout(() => setCopied(false), 2000);

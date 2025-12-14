@@ -42,6 +42,14 @@ export default function Checkout() {
   useEffect(() => {
     const orderParam = searchParams.get("order");
     const verifyParam = searchParams.get("verify");
+    const refParam = searchParams.get("ref");
+
+    // If a referral code present in URL, store it for later (before checkout completes)
+    if (refParam) {
+      try {
+        localStorage.setItem("referral_code", refParam);
+      } catch (e) {}
+    }
 
     if (orderParam && verifyParam === "true") {
       verifyPayment(orderParam);
@@ -68,6 +76,26 @@ export default function Checkout() {
           title: "Payment Successful!",
           description: `Your order #${orderNumber} has been confirmed.`,
         });
+
+        // If a referral code was used (in localStorage), mark the referral as completed
+        try {
+          const referralCode = localStorage.getItem("referral_code");
+          if (referralCode) {
+            // update the referral record with referred email/name and mark completed
+            await supabase.from("referrals").update({
+              referred_email: address.email,
+              referred_name: address.name || null,
+              status: "completed",
+              reward_amount: 99,
+              completed_at: new Date().toISOString(),
+            }).eq("referral_code", referralCode);
+
+            // remove stored referral code once applied
+            localStorage.removeItem("referral_code");
+          }
+        } catch (err) {
+          console.error("Error applying referral:", err);
+        }
       } else {
         toast({
           title: "Payment Pending",
@@ -97,7 +125,8 @@ export default function Checkout() {
     pincode: "",
   });
 
-  const shippingCost = subtotal >= 500000 ? 0 : 9900; // Free shipping over ₹5000
+  // `subtotal` is stored in rupees across the app. Keep shipping and totals in rupees.
+  const shippingCost = subtotal >= 5000 ? 0 : 499; // Free shipping over ₹5000, otherwise ₹499
   const discountAmount = Math.round((subtotal * couponDiscount) / 100);
   const finalTotal = subtotal - discountAmount + shippingCost;
 
@@ -141,7 +170,8 @@ export default function Checkout() {
       body: {
         action: 'create_order',
         orderId: orderNumber,
-        orderAmount: finalTotal / 100, // Convert paise to rupees
+        // finalTotal is in rupees; pass rupees to payment function
+        orderAmount: finalTotal,
         customerDetails: {
           email: address.email,
           phone: address.phone,
@@ -202,9 +232,11 @@ export default function Checkout() {
         // Create Cashfree order and redirect to payment
         const cashfreeData = await createCashfreeOrder(orderNumber);
         
-        if (cashfreeData.success && cashfreeData.paymentSessionId) {
-          // Redirect to Cashfree payment page
-          const paymentUrl = `https://sandbox.cashfree.com/pg/view/sessions/${cashfreeData.paymentSessionId}`;
+        if (cashfreeData.success && (cashfreeData.paymentUrl || cashfreeData.paymentSessionId)) {
+          // Prefer server-returned paymentUrl (handles sandbox/production), fallback to session ID
+          const paymentUrl = cashfreeData.paymentUrl
+            ? cashfreeData.paymentUrl
+            : `https://sandbox.cashfree.com/pg/view/sessions/${cashfreeData.paymentSessionId}`;
           window.location.href = paymentUrl;
           return;
         } else {
@@ -472,9 +504,7 @@ export default function Checkout() {
                             Qty: {item.quantity}
                           </p>
                         </div>
-                        <p className="text-sm font-medium">
-                          ₹{((item.product.price * item.quantity) / 100).toLocaleString()}
-                        </p>
+                          <p className="text-sm font-medium">₹{(item.product.price * item.quantity).toLocaleString()}</p>
                       </div>
                     ))}
                   </div>
@@ -492,28 +522,28 @@ export default function Checkout() {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Subtotal</span>
-                      <span>₹{(subtotal / 100).toLocaleString()}</span>
+                      <span>₹{subtotal.toLocaleString()}</span>
                     </div>
                     {discountAmount > 0 && (
                       <div className="flex justify-between text-green-600">
                         <span>Discount ({couponDiscount}%)</span>
-                        <span>-₹{(discountAmount / 100).toLocaleString()}</span>
+                        <span>-₹{discountAmount.toLocaleString()}</span>
                       </div>
                     )}
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Shipping</span>
-                      <span>
-                        {shippingCost === 0 ? (
-                          <span className="text-green-600">Free</span>
-                        ) : (
-                          `₹${(shippingCost / 100).toLocaleString()}`
-                        )}
-                      </span>
+                        <span>
+                          {shippingCost === 0 ? (
+                            <span className="text-green-600">Free</span>
+                          ) : (
+                            `₹${shippingCost.toLocaleString()}`
+                          )}
+                        </span>
                     </div>
                     <Separator />
                     <div className="flex justify-between text-base font-semibold">
                       <span>Total</span>
-                      <span>₹{(finalTotal / 100).toLocaleString()}</span>
+                      <span>₹{finalTotal.toLocaleString()}</span>
                     </div>
                   </div>
 

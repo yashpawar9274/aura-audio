@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { NotifyMeButton } from "@/components/notify/NotifyMeButton";
 import { ArrowRight, Bell, Tag } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import heroAirpods from "@/assets/hero-airpods.png";
@@ -115,10 +116,7 @@ export function Hero() {
               </Link>
               
               {settings?.show_upcoming_banner && (
-                <Button variant="heroOutline" size="lg" className="group">
-                  <Bell className="mr-2 h-5 w-5" />
-                  Notify Me
-                </Button>
+                <NotifyMeButton productName={"New AirPods"} />
               )}
             </div>
 

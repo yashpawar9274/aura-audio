@@ -6,19 +6,13 @@ import { useCartContext } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
-const navLinks = [{
-  href: "/",
-  label: "Home"
-}, {
-  href: "/products",
-  label: "Products"
-}, {
-  href: "/about",
-  label: "About"
-}, {
-  href: "/contact",
-  label: "Contact"
-}];
+const navLinks = [
+  { href: "/", label: "Home" },
+  { href: "/products", label: "Products" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
+  { href: "/refer", label: "Refer & Earn" },
+];
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

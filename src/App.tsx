@@ -29,10 +29,15 @@ import { AdminOrders } from "./pages/admin/AdminOrders";
 import { AdminReviews } from "./pages/admin/AdminReviews";
 import { AdminUsers } from "./pages/admin/AdminUsers";
 import { AdminSettings } from "./pages/admin/AdminSettings";
+import { AdminWarrantyCards } from "./pages/admin/AdminWarrantyCards";
+import AdminWarrantyCardView from "./pages/admin/AdminWarrantyCardView";
+import AdminWarrantyCardPrint from "./pages/admin/AdminWarrantyCardPrint";
+import AdminStaffEarnings from "./pages/admin/AdminStaffEarnings";
 import { AdminNotifyMe } from "./pages/admin/AdminNotifyMe";
 import { AdminReferrals } from "./pages/admin/AdminReferrals";
 import Notify from "./pages/Notify";
 import Refer from "./pages/Refer";
+import ReferDashboard from "./pages/ReferDashboard";
 
 const queryClient = new QueryClient();
 
@@ -69,9 +74,18 @@ const App = () => (
                   <Route path="orders" element={<AdminOrders />} />
                   <Route path="reviews" element={<AdminReviews />} />
                   <Route path="users" element={<AdminUsers />} />
+                  <Route path="warranty" element={<AdminWarrantyCards />} />
+                  <Route path="warranty/:id" element={<AdminWarrantyCardView />} />
+                  <Route path="notify" element={<AdminNotifyMe />} />
+                  <Route path="referrals" element={<AdminReferrals />} />
+                  <Route path="staff-earnings" element={<AdminStaffEarnings />} />
                   <Route path="settings" element={<AdminSettings />} />
                 </Route>
+                <Route path="/admin/warranty/print/:id" element={<AdminWarrantyCardPrint />} />
                 
+                <Route path="/notify" element={<Notify />} />
+                <Route path="/refer" element={<Refer />} />
+                <Route path="/refer/dashboard" element={<ReferDashboard />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>

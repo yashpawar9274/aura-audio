@@ -55,9 +55,13 @@ serve(async (req) => {
         throw new Error(data.message || 'Failed to create Cashfree order');
       }
 
+      // Build a payment URL for redirecting the customer to the Cashfree hosted session
+      const paymentUrl = `${CASHFREE_API_URL}/view/sessions/${data.payment_session_id}`;
+
       return new Response(JSON.stringify({
         success: true,
         paymentSessionId: data.payment_session_id,
+        paymentUrl,
         orderId: data.order_id,
         orderStatus: data.order_status,
       }), {

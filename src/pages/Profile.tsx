@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ReferDashboard from "./ReferDashboard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2, User, Package, LogOut, Settings, ShieldCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -176,10 +177,14 @@ export default function Profile() {
             </div>
 
             <Tabs defaultValue="orders" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
+              <TabsList className="grid w-full grid-cols-3 lg:w-[600px]">
                 <TabsTrigger value="orders" className="gap-2">
                   <Package className="h-4 w-4" />
                   My Orders
+                </TabsTrigger>
+                <TabsTrigger value="referrals" className="gap-2">
+                  <User className="h-4 w-4" />
+                  Referrals
                 </TabsTrigger>
                 <TabsTrigger value="settings" className="gap-2">
                   <Settings className="h-4 w-4" />
@@ -230,7 +235,7 @@ export default function Profile() {
                           </p>
                           <div className="flex items-center gap-4">
                             <p className="font-semibold">
-                              ₹{(order.total / 100).toLocaleString()}
+                              ₹{(order.total).toLocaleString()}
                             </p>
                             <Button
                               variant="outline"
@@ -245,6 +250,10 @@ export default function Profile() {
                     </Card>
                   ))
                 )}
+              </TabsContent>
+
+              <TabsContent value="referrals" className="space-y-4">
+                <ReferDashboard />
               </TabsContent>
 
               <TabsContent value="settings" className="space-y-6">

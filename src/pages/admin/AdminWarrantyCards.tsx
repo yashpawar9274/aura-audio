@@ -5,8 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Shield, Plus, Trash2, Search, Mail, Calendar, Edit2 } from "lucide-react";
+import { Loader2, Shield, Plus, Trash2, Search, Mail, Calendar, Edit2, Eye } from "lucide-react";
+import { Link } from "react-router-dom";
 import { format, addMonths } from "date-fns";
+import { useAuth } from "@/hooks/useAuth";
 
 interface WarrantyCard {
   id: string;
@@ -21,9 +23,11 @@ interface WarrantyCard {
   notes: string | null;
   created_at: string;
   sent_at: string | null;
+  created_by?: string | null;
 }
 
 export function AdminWarrantyCards() {
+  const { user } = useAuth();
   const [cards, setCards] = useState<WarrantyCard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -89,6 +93,7 @@ export function AdminWarrantyCards() {
         warranty_period: formData.warranty_period,
         warranty_end_date: warrantyEndDate.toISOString().split("T")[0],
         notes: formData.notes || null,
+        created_by: user?.id || null,
       });
 
       if (error) throw error;
@@ -317,6 +322,12 @@ export function AdminWarrantyCards() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 ml-4">
+                    <Link to={`/admin/warranty/${card.id}`}>
+                      <Button variant="outline" size="sm">
+                        <Eye className="h-4 w-4 mr-1" />
+                        View
+                      </Button>
+                    </Link>
                     {!card.sent_at && (
                       <Button variant="outline" size="sm" onClick={() => handleSendEmail(card)}>
                         <Mail className="h-4 w-4 mr-1" />

@@ -21,6 +21,7 @@ import {
   RefreshCw,
   Loader2,
 } from "lucide-react";
+import { NotifyMeButton } from "@/components/notify/NotifyMeButton";
 import { cn } from "@/lib/utils";
 
 interface DBProduct {
@@ -482,9 +483,7 @@ const ProductDetail = () => {
 
                 {product.isUpcoming && (
                   <div className="mb-8">
-                    <Button variant="hero" size="lg" className="w-full">
-                      Notify Me When Available
-                    </Button>
+                    <NotifyMeButton productId={product.id} productName={product.name} />
                     <p className="text-sm text-muted-foreground text-center mt-3">
                       Expected launch: {product.launchDate}
                     </p>
