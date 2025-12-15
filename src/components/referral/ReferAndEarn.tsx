@@ -45,7 +45,7 @@ export function ReferAndEarn() {
           referred_name: "",
           referral_code: code,
           status: "active",
-          reward_amount: 99,
+          reward_amount: 49,
         };
 
         const { error } = await supabase.from("referrals").insert(payload);

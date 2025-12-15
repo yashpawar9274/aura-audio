@@ -81,12 +81,25 @@ export default function Checkout() {
         try {
           const referralCode = localStorage.getItem("referral_code");
           if (referralCode) {
+            // determine reward amount based on ordered products (combo -> 111, else 49)
+            let rewardAmount = 49;
+            try {
+              const { data: order } = await supabase.from('orders').select('items').eq('order_number', orderNumber).maybeSingle();
+              if (order && order.items && Array.isArray(order.items)) {
+                const ids = order.items.map((it: any) => it.id).filter(Boolean);
+                if (ids.length) {
+                  const { data: prods } = await supabase.from('products').select('id,is_combo').in('id', ids);
+                  if (prods && prods.some((p: any) => p.is_combo)) rewardAmount = 111;
+                }
+              }
+            } catch (e) { console.error('Error checking combo products for reward:', e); }
+
             // update the referral record with referred email/name and mark completed
             await supabase.from("referrals").update({
               referred_email: address.email,
               referred_name: address.name || null,
               status: "completed",
-              reward_amount: 99,
+              reward_amount: rewardAmount,
               completed_at: new Date().toISOString(),
             }).eq("referral_code", referralCode);
 
@@ -227,6 +240,35 @@ export default function Checkout() {
       }]);
 
       if (error) throw error;
+
+      // If a referral code was used (stored in localStorage), create a referral usage record
+      try {
+        const referralCode = typeof window !== 'undefined' ? localStorage.getItem('referral_code') : null;
+        if (referralCode) {
+          // find the original referrer for this code
+          const { data: original, error: origErr } = await supabase.from('referrals').select('referrer_email,referrer_name').eq('referral_code', referralCode).maybeSingle();
+          if (!origErr && original && original.referrer_email) {
+            // determine reward amount for this order (combo -> 111, else 49)
+            const hasCombo = items.some(i => (i.product as any)?.is_combo);
+            const usageReward = hasCombo ? 111 : 49;
+            // create a new referral entry for this usage (unique code by suffixing order)
+            const usageCode = `${referralCode}-${orderNumber}`;
+            await supabase.from('referrals').insert([{
+              referrer_email: original.referrer_email,
+              referrer_name: original.referrer_name || null,
+              referred_email: address.email,
+              referred_name: address.name || null,
+              referral_code: usageCode,
+              status: 'pending',
+              reward_amount: usageReward,
+              created_at: new Date().toISOString()
+            }]);
+            try { localStorage.removeItem('referral_code'); } catch (e) {}
+          }
+        }
+      } catch (err) {
+        console.error('Error creating referral usage:', err);
+      }
 
       if (paymentMethod === "cashfree") {
         // Create Cashfree order and redirect to payment

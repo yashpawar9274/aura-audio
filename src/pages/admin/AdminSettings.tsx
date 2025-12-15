@@ -21,6 +21,13 @@ interface SiteSettings {
   contact_phone: string;
   contact_address: string;
   business_hours: string;
+  about_html?: string | null;
+  privacy_html?: string | null;
+  refund_html?: string | null;
+  returns_html?: string | null;
+  shipping_html?: string | null;
+  terms_html?: string | null;
+  faq_html?: string | null;
 }
 
 export function AdminSettings() {
@@ -305,6 +312,44 @@ export function AdminSettings() {
           </div>
         </div>
 
+        {/* Site Pages */}
+        <div className="bg-card rounded-2xl border border-border/50 p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <Megaphone className="h-5 w-5 text-primary" />
+            <h2 className="text-xl font-semibold">Site Pages (HTML)</h2>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">About Page HTML</label>
+              <Textarea value={settings?.about_html || ""} onChange={(e) => setSettings({ ...settings!, about_html: e.target.value })} rows={6} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Privacy Policy HTML</label>
+              <Textarea value={settings?.privacy_html || ""} onChange={(e) => setSettings({ ...settings!, privacy_html: e.target.value })} rows={6} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Refund Policy HTML</label>
+              <Textarea value={settings?.refund_html || ""} onChange={(e) => setSettings({ ...settings!, refund_html: e.target.value })} rows={6} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Returns Page HTML</label>
+              <Textarea value={settings?.returns_html || ""} onChange={(e) => setSettings({ ...settings!, returns_html: e.target.value })} rows={6} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Shipping Page HTML</label>
+              <Textarea value={settings?.shipping_html || ""} onChange={(e) => setSettings({ ...settings!, shipping_html: e.target.value })} rows={6} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Terms Page HTML</label>
+              <Textarea value={settings?.terms_html || ""} onChange={(e) => setSettings({ ...settings!, terms_html: e.target.value })} rows={6} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">FAQ Page HTML</label>
+              <Textarea value={settings?.faq_html || ""} onChange={(e) => setSettings({ ...settings!, faq_html: e.target.value })} rows={6} />
+            </div>
+          </div>
+        </div>
         {/* Save Button */}
         <Button onClick={handleSave} disabled={isSaving} className="w-full h-12">
           {isSaving ? (

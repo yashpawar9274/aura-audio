@@ -53,6 +53,8 @@ export function AdminProducts() {
     in_stock: true,
     is_upcoming: false,
     is_featured: false,
+    is_combo: false,
+    combo_components: "",
   });
 
   useEffect(() => {
@@ -77,7 +79,7 @@ export function AdminProducts() {
   };
 
   const handleOpenDialog = (product?: Product) => {
-    if (product) {
+      if (product) {
       setEditingProduct(product);
       setFormData({
         name: product.name,
@@ -93,6 +95,8 @@ export function AdminProducts() {
         in_stock: product.in_stock,
         is_upcoming: product.is_upcoming,
         is_featured: product.is_featured,
+        is_combo: (product as any).is_combo || false,
+        combo_components: ((product as any).combo_components && Array.isArray((product as any).combo_components)) ? (product as any).combo_components.join(', ') : "",
       });
     } else {
       setEditingProduct(null);
@@ -133,6 +137,8 @@ export function AdminProducts() {
         in_stock: formData.in_stock,
         is_upcoming: formData.is_upcoming,
         is_featured: formData.is_featured,
+        is_combo: formData.is_combo,
+        combo_components: formData.combo_components ? formData.combo_components.split(",").map(s => s.trim()).filter(Boolean) : null,
       };
 
       // parse media lines like "image:https://..." or "video:https://..." and store inside specs.media
@@ -341,6 +347,19 @@ export function AdminProducts() {
                   />
                   <span className="text-sm">Upcoming</span>
                 </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={formData.is_combo}
+                    onCheckedChange={(checked) => setFormData({ ...formData, is_combo: checked })}
+                  />
+                  <span className="text-sm">Combo Product</span>
+                </div>
+                {formData.is_combo && (
+                  <div className="w-full pt-2">
+                    <label className="block text-sm font-medium mb-1">Combo Components (comma-separated product ids or slugs)</label>
+                    <Textarea value={formData.combo_components} onChange={(e) => setFormData({ ...formData, combo_components: e.target.value })} rows={2} />
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-end gap-3 pt-4">

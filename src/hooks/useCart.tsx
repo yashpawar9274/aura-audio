@@ -148,3 +148,11 @@ export function useCartContext() {
   }
   return context;
 }
+
+export function calculateTotals(items: CartItem[]) {
+  const subtotal = items.reduce((s, it) => s + it.product.price * it.quantity, 0);
+  // Fixed shipping: always charge 100 INR
+  const shipping = 100;
+  const total = subtotal + shipping;
+  return { subtotal, shipping, total };
+}

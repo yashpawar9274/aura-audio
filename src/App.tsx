@@ -41,65 +41,67 @@ import AdminWithdrawals from "./pages/admin/AdminWithdrawals";
 import Notify from "./pages/Notify";
 import Refer from "./pages/Refer";
 import ReferDashboard from "./pages/ReferDashboard";
+import useOrderAnnouncements from "@/hooks/useOrderAnnouncements";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <HelmetProvider>
-      <AuthProvider>
-        <CartProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/products" element={<Products />} />
-                <Route path="/product/:slug" element={<ProductDetail />} />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/track-order" element={<TrackOrder />} />
-                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                <Route path="/terms" element={<Terms />} />
-                <Route path="/returns" element={<Returns />} />
-                <Route path="/faq" element={<FAQ />} />
-                <Route path="/shipping" element={<Shipping />} />
-                
-                {/* Admin Routes */}
-                <Route path="/admin" element={<AdminLayout />}>
-                  <Route index element={<AdminDashboard />} />
-                  <Route path="products" element={<AdminProducts />} />
-                  <Route path="orders" element={<AdminOrders />} />
-                  <Route path="reviews" element={<AdminReviews />} />
-                  <Route path="users" element={<AdminUsers />} />
-                  <Route path="warranty" element={<AdminWarrantyCards />} />
-                  <Route path="serials" element={<AdminSerials />} />
-                  <Route path="warranty/:id" element={<AdminWarrantyCardView />} />
-                  <Route path="support" element={<AdminContact />} />
-                  <Route path="notify" element={<AdminNotifyMe />} />
-                  <Route path="referrals" element={<AdminReferrals />} />
-                  <Route path="withdrawals" element={<AdminWithdrawals />} />
-                  <Route path="staff-earnings" element={<AdminStaffEarnings />} />
-                  <Route path="settings" element={<AdminSettings />} />
-                </Route>
-                <Route path="/admin/warranty/print/:id" element={<AdminWarrantyCardPrint />} />
-                
-                <Route path="/notify" element={<Notify />} />
-                <Route path="/refer" element={<Refer />} />
-                <Route path="/refer/dashboard" element={<ReferDashboard />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </CartProvider>
-      </AuthProvider>
-    </HelmetProvider>
-  </QueryClientProvider>
-);
+export default function App() {
+  useOrderAnnouncements();
+  return (
+    <QueryClientProvider client={queryClient}>
+      <HelmetProvider>
+        <AuthProvider>
+          <CartProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/products" element={<Products />} />
+                  <Route path="/product/:slug" element={<ProductDetail />} />
+                  <Route path="/cart" element={<Cart />} />
+                  <Route path="/checkout" element={<Checkout />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/track-order" element={<TrackOrder />} />
+                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                  <Route path="/terms" element={<Terms />} />
+                  <Route path="/returns" element={<Returns />} />
+                  <Route path="/faq" element={<FAQ />} />
+                  <Route path="/shipping" element={<Shipping />} />
 
-export default App;
+                  {/* Admin Routes */}
+                  <Route path="/admin" element={<AdminLayout />}>
+                    <Route index element={<AdminDashboard />} />
+                    <Route path="products" element={<AdminProducts />} />
+                    <Route path="orders" element={<AdminOrders />} />
+                    <Route path="reviews" element={<AdminReviews />} />
+                    <Route path="users" element={<AdminUsers />} />
+                    <Route path="warranty" element={<AdminWarrantyCards />} />
+                    <Route path="serials" element={<AdminSerials />} />
+                    <Route path="warranty/:id" element={<AdminWarrantyCardView />} />
+                    <Route path="support" element={<AdminContact />} />
+                    <Route path="notify" element={<AdminNotifyMe />} />
+                    <Route path="referrals" element={<AdminReferrals />} />
+                    <Route path="withdrawals" element={<AdminWithdrawals />} />
+                    <Route path="staff-earnings" element={<AdminStaffEarnings />} />
+                    <Route path="settings" element={<AdminSettings />} />
+                  </Route>
+                  <Route path="/admin/warranty/print/:id" element={<AdminWarrantyCardPrint />} />
+
+                  <Route path="/notify" element={<Notify />} />
+                  <Route path="/refer" element={<Refer />} />
+                  <Route path="/refer/dashboard" element={<ReferDashboard />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </TooltipProvider>
+          </CartProvider>
+        </AuthProvider>
+      </HelmetProvider>
+    </QueryClientProvider>
+  );
+}

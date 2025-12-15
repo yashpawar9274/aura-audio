@@ -5,10 +5,19 @@ import { Button } from "@/components/ui/button";
 import { useCartContext } from "@/hooks/useCart";
 import { ShoppingBag, Minus, Plus, Trash2, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Cart = () => {
   const { items, removeItem, updateQuantity, subtotal, itemCount } =
     useCartContext();
+
+  const [referralCode, setReferralCode] = useState<string>("");
+  const { toast } = useToast();
+  const appliedReferral = typeof window !== "undefined" ? localStorage.getItem("referral_code") : null;
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-IN", {
@@ -155,6 +164,33 @@ const Cart = () => {
                     <h2 className="text-xl font-semibold mb-6">Order Summary</h2>
 
                     <div className="space-y-4 mb-6">
+                      <div className="mb-4">
+                        <Label>Referral Code</Label>
+                        <div className="flex gap-2 mt-2">
+                          <Input
+                            placeholder="Enter referral code"
+                            value={referralCode}
+                            onChange={(e) => setReferralCode(e.target.value)}
+                          />
+                          <Button
+                            onClick={async () => {
+                              if (!referralCode) return toast({ title: "Invalid", description: "Enter a referral code", variant: "destructive" });
+                              try {
+                                const { data } = await supabase.from("referrals").select("id").eq("referral_code", referralCode).maybeSingle();
+                                if (!data) return toast({ title: "Not found", description: "Referral code not valid", variant: "destructive" });
+                                try { localStorage.setItem("referral_code", referralCode); } catch (e) {}
+                                toast({ title: "Applied", description: "Referral code saved" });
+                              } catch (err) {
+                                console.error(err);
+                                toast({ title: "Error", description: "Could not verify code", variant: "destructive" });
+                              }
+                            }}
+                          >
+                            Apply
+                          </Button>
+                        </div>
+                        {appliedReferral && <div className="text-sm text-muted-foreground mt-2">Applied: {appliedReferral}</div>}
+                      </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Subtotal</span>
                         <span className="font-medium">{formatPrice(subtotal)}</span>

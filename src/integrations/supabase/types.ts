@@ -126,6 +126,8 @@ export type Database = {
           images: string[] | null
           in_stock: boolean | null
           is_featured: boolean | null
+          is_combo: boolean | null
+          combo_components: Json | null
           is_upcoming: boolean | null
           launch_date: string | null
           name: string
@@ -325,6 +327,13 @@ export type Database = {
           coupon_discount: number | null
           hero_subtitle: string | null
           hero_title: string | null
+          about_html: string | null
+          privacy_html: string | null
+          refund_html: string | null
+          returns_html: string | null
+          shipping_html: string | null
+          terms_html: string | null
+          faq_html: string | null
           id: string
           show_upcoming_banner: boolean | null
           updated_at: string
@@ -341,6 +350,13 @@ export type Database = {
           coupon_discount?: number | null
           hero_subtitle?: string | null
           hero_title?: string | null
+          about_html?: string | null
+          privacy_html?: string | null
+          refund_html?: string | null
+          returns_html?: string | null
+          shipping_html?: string | null
+          terms_html?: string | null
+          faq_html?: string | null
           id?: string
           show_upcoming_banner?: boolean | null
           updated_at?: string
@@ -357,6 +373,13 @@ export type Database = {
           coupon_discount?: number | null
           hero_subtitle?: string | null
           hero_title?: string | null
+          about_html?: string | null
+          privacy_html?: string | null
+          refund_html?: string | null
+          returns_html?: string | null
+          shipping_html?: string | null
+          terms_html?: string | null
+          faq_html?: string | null
           id?: string
           show_upcoming_banner?: boolean | null
           updated_at?: string

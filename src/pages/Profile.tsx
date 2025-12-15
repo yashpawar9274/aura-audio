@@ -83,7 +83,7 @@ export default function Profile() {
           localStorage.setItem('referral_code', existing.referral_code);
         } else if (!existing) {
           const code = ("REF-" + Math.random().toString(36).slice(2, 8).toUpperCase());
-          const { error } = await supabase.from("referrals").insert({ referrer_email: user.email, referrer_name: user.email.split("@")[0] || null, referral_code: code, status: "active", reward_amount: 99 });
+          const { error } = await supabase.from("referrals").insert({ referrer_email: user.email, referrer_name: user.email.split("@")[0] || null, referral_code: code, status: "active", reward_amount: 49 });
           if (!error) localStorage.setItem('referral_code', code);
         }
       }
