@@ -93,7 +93,7 @@ const About = () => {
                       <h2 className="text-3xl font-bold mb-6">Our Story</h2>
                       <div className="space-y-4 text-muted-foreground">
                         <p>
-                          Founded in 2020, AirPods Store began with a simple vision: to
+                          Founded in 2025, AirPods Store began with a simple vision: to
                           create a trusted destination where audio enthusiasts could find
                           genuine, premium wireless products.
                         </p>

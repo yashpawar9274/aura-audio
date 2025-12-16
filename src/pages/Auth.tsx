@@ -81,7 +81,7 @@ const Auth = () => {
   return (
     <>
       <Helmet>
-        <title>{isLogin ? "Login" : "Sign Up"} | AirPods Store</title>
+        <title>{isLogin ? "Login" : "Sign Up"} | SoundPods Store</title>
       </Helmet>
 
       <Layout>
