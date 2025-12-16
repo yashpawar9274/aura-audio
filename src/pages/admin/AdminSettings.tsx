@@ -11,6 +11,7 @@ interface SiteSettings {
   id: string;
   hero_title: string;
   hero_subtitle: string;
+  hero_video_url?: string | null;
   show_upcoming_banner: boolean;
   announcement_text: string;
   announcement_active: boolean;
@@ -81,6 +82,7 @@ export function AdminSettings() {
           id: "main",
           hero_title: settings.hero_title,
           hero_subtitle: settings.hero_subtitle,
+          hero_video_url: settings.hero_video_url,
           show_upcoming_banner: settings.show_upcoming_banner,
           announcement_text: settings.announcement_text,
           announcement_active: settings.announcement_active,
@@ -144,6 +146,19 @@ export function AdminSettings() {
                 placeholder="Experience audio perfection..."
                 rows={3}
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Hero Video URL</label>
+              <Input
+                type="url"
+                value={settings?.hero_video_url || ""}
+                onChange={(e) => setSettings({ ...settings!, hero_video_url: e.target.value })}
+                placeholder="https://your-supabase-url/storage/v1/object/public/videos/hero.mp4"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Paste your Supabase storage video URL here. Leave empty to show product image instead. Video will auto-play, loop, and be muted.
+              </p>
             </div>
 
             <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/30">

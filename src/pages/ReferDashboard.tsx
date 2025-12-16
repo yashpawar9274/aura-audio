@@ -70,9 +70,7 @@ export default function ReferDashboard() {
       setRefs(codes || []);
       const first = (codes && codes[0]) || null;
       setReferral(first);
-      if (first?.referral_code) {
-        try { localStorage.setItem('referral_code', first.referral_code); } catch (e) {}
-      }
+      // Don't auto-store user's own referral code to prevent self-referral issues
 
       const { data: account } = await untypedSupabase.from('referral_accounts').select('*').eq('user_id', user?.id).maybeSingle();
       if (account) setBank({ account_name: account.account_name || '', account_number: account.account_number || '', ifsc: account.ifsc || '', bank_name: account.bank_name || '' });

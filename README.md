@@ -1,73 +1,68 @@
-# Welcome to your Lovable project
-cfsk_ma_prod_ddabb37e4075324c46b6bdcf546425c5_e31d9b17
-## Project info
-1150369bde399a0609cc158b9109630511
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+# Aura Audio (aura-audio-main)
 
-## How can I edit this code?
+Small Vite + React + TypeScript single-page app. Includes Tailwind CSS, shadcn-style UI components, a PWA service worker, and Supabase integrations for data/auth.
 
-There are several ways of editing your application.
+**Quick Start**
 
-**Use Lovable**
+- Install dependencies: `npm i`
+- Start dev server (Vite): `npm run dev` (dev server binds to `::` and runs on port `8080` by default in this template)
+- Build: `npm run build`
+- Preview production build: `npm run preview`
+- Lint: `npm run lint`
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+**Environment**
 
-Changes made via Lovable will be committed automatically to this repo.
+Create a `.env` (or set environment variables) with at least the following keys for Supabase integration:
 
-**Use your preferred IDE**
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+The Supabase client is at `src/integrations/supabase/client.ts`.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+**Project structure (high level)**
 
-Follow these steps:
+- `src/` — application source
+	- `src/main.tsx` — app entry
+	- `src/App.tsx` — routing and global providers
+	- `src/pages/` — top-level pages
+	- `src/components/` — UI components (including `src/components/ui` for shadcn-style primitives)
+	- `src/hooks/` — custom hooks (e.g., `useAuth.tsx`, `useCart.tsx`)
+- `public/` — static assets and `sw.js` service worker
+- `supabase/` — Supabase function(s) and SQL migrations
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+Key files to inspect when editing or debugging:
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+- `src/App.tsx` — routing and provider composition
+- `src/main.tsx` — application bootstrap
+- `src/integrations/supabase/client.ts` — Supabase client (env keys above)
 
-# Step 3: Install the necessary dependencies.
-npm i
+**Development notes & conventions**
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+- Absolute imports use the `@/` alias (configured in `vite.config.ts`) — import like `import X from "@/path"`.
+- Data access uses the typed Supabase client: `import { supabase } from "@/integrations/supabase/client"` then `await supabase.from('products').select('*')`.
+- React Query (`QueryClientProvider`) is used for caching/fetching and wraps the app in `src/App.tsx`.
+- Toaster components and consistent UI primitives live under `src/components/ui`.
+- Admin routes are under `src/pages/admin` and layout at `src/components/admin/AdminLayout.tsx`.
 
-**Edit a file directly in GitHub**
+**Supabase functions & migrations**
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- Serverless functions live in `supabase/functions/` (example: `cashfree-payment`).
+- SQL migrations are under `supabase/migrations/`.
 
-**Use GitHub Codespaces**
+**Running locally**
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+1. Copy or add required env vars (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`).
+2. Install: `npm i`
+3. Start dev server: `npm run dev` and open `http://localhost:8080`
 
-## What technologies are used for this project?
+**Contributing**
 
-This project is built with:
+- Fork or branch, make changes, run `npm i` and `npm run dev` to test. Open a PR when ready.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+If you'd like, I can also:
 
-## How can I deploy this project?
+- Add a `.env.example` file with the env keys shown above.
+- Add a short `CONTRIBUTING.md` with local testing steps.
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+---
+Updated README to provide concise developer setup and key pointers.

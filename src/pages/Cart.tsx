@@ -27,7 +27,7 @@ const Cart = () => {
     }).format(price);
   };
 
-  const shipping = subtotal >= 5000 ? 0 : 499;
+  const shipping = subtotal >= 1500 ? 0 : 99;
   const total = subtotal + shipping;
 
   return (
@@ -176,9 +176,11 @@ const Cart = () => {
                             onClick={async () => {
                               if (!referralCode) return toast({ title: "Invalid", description: "Enter a referral code", variant: "destructive" });
                               try {
-                                const { data } = await supabase.from("referrals").select("id").eq("referral_code", referralCode).maybeSingle();
-                                if (!data) return toast({ title: "Not found", description: "Referral code not valid", variant: "destructive" });
-                                try { localStorage.setItem("referral_code", referralCode); } catch (e) {}
+                                const { data } = await supabase.from("referrals").select("id,referrer_email,status").eq("referral_code", referralCode.toUpperCase()).maybeSingle();
+                                if (!data) return toast({ title: "Not found", description: "Referral code is not valid", variant: "destructive" });
+                                if (data.status !== "active") return toast({ title: "Invalid", description: "This referral code is no longer active", variant: "destructive" });
+                                if (data.referrer_email === (user?.email || "")) return toast({ title: "Invalid", description: "You cannot use your own referral code", variant: "destructive" });
+                                try { localStorage.setItem("referral_code", referralCode.toUpperCase()); } catch (e) {}
                                 toast({ title: "Applied", description: "Referral code saved" });
                               } catch (err) {
                                 console.error(err);

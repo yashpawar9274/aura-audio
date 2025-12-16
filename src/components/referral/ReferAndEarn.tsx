@@ -33,7 +33,7 @@ export function ReferAndEarn() {
       const { data: existing } = await supabase.from("referrals").select("*").eq("referrer_email", referrerEmail).maybeSingle();
       if (existing && existing.referral_code) {
         setReferralCode(existing.referral_code);
-        try { localStorage.setItem('referral_code', existing.referral_code); } catch (e) {}
+        // Don't auto-store in localStorage to prevent self-referral
         setStep("code");
         toast({ title: "Found", description: "Existing referral code loaded." });
       } else {
@@ -52,7 +52,7 @@ export function ReferAndEarn() {
         if (error) throw error;
 
         setReferralCode(code);
-        try { localStorage.setItem('referral_code', code); } catch (e) {}
+        // Don't auto-store in localStorage to prevent self-referral
         setStep("code");
         toast({ title: "Success!", description: "Your referral code has been generated." });
       }

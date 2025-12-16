@@ -79,7 +79,7 @@ export default function Checkout() {
 
         // If a referral code was used (in localStorage), mark the referral as completed
         try {
-          const referralCode = localStorage.getItem("referral_code");
+          const referralCode = localStorage.getItem("referral_code")?.toUpperCase();
           if (referralCode) {
             // determine reward amount based on ordered products (combo -> 111, else 49)
             let rewardAmount = 49;
@@ -95,16 +95,19 @@ export default function Checkout() {
             } catch (e) { console.error('Error checking combo products for reward:', e); }
 
             // update the referral record with referred email/name and mark completed
-            await supabase.from("referrals").update({
+            const { error: updateErr } = await supabase.from("referrals").update({
               referred_email: address.email,
               referred_name: address.name || null,
               status: "completed",
               reward_amount: rewardAmount,
               completed_at: new Date().toISOString(),
             }).eq("referral_code", referralCode);
-
-            // remove stored referral code once applied
-            localStorage.removeItem("referral_code");
+            
+            if (updateErr) console.error('Error updating referral:', updateErr);
+            else {
+              // remove stored referral code once applied
+              localStorage.removeItem("referral_code");
+            }
           }
         } catch (err) {
           console.error("Error applying referral:", err);
@@ -139,7 +142,7 @@ export default function Checkout() {
   });
 
   // `subtotal` is stored in rupees across the app. Keep shipping and totals in rupees.
-  const shippingCost = subtotal >= 5000 ? 0 : 499; // Free shipping over ₹5000, otherwise ₹499
+  const shippingCost = subtotal >= 1500 ? 0 : 99; // Free shipping over ₹1500, otherwise ₹99
   const discountAmount = Math.round((subtotal * couponDiscount) / 100);
   const finalTotal = subtotal - discountAmount + shippingCost;
 
@@ -243,17 +246,17 @@ export default function Checkout() {
 
       // If a referral code was used (stored in localStorage), create a referral usage record
       try {
-        const referralCode = typeof window !== 'undefined' ? localStorage.getItem('referral_code') : null;
+        const referralCode = typeof window !== 'undefined' ? localStorage.getItem('referral_code')?.toUpperCase() : null;
         if (referralCode) {
           // find the original referrer for this code
-          const { data: original, error: origErr } = await supabase.from('referrals').select('referrer_email,referrer_name').eq('referral_code', referralCode).maybeSingle();
+          const { data: original, error: origErr } = await supabase.from('referrals').select('referrer_email,referrer_name,id').eq('referral_code', referralCode).maybeSingle();
           if (!origErr && original && original.referrer_email) {
             // determine reward amount for this order (combo -> 111, else 49)
             const hasCombo = items.some(i => (i.product as any)?.is_combo);
             const usageReward = hasCombo ? 111 : 49;
             // create a new referral entry for this usage (unique code by suffixing order)
             const usageCode = `${referralCode}-${orderNumber}`;
-            await supabase.from('referrals').insert([{
+            const { error: insertErr } = await supabase.from('referrals').insert([{
               referrer_email: original.referrer_email,
               referrer_name: original.referrer_name || null,
               referred_email: address.email,
@@ -263,11 +266,16 @@ export default function Checkout() {
               reward_amount: usageReward,
               created_at: new Date().toISOString()
             }]);
-            try { localStorage.removeItem('referral_code'); } catch (e) {}
+            if (insertErr) console.error('Error creating referral usage:', insertErr);
+            else {
+              try { localStorage.removeItem('referral_code'); } catch (e) {}
+            }
+          } else if (origErr) {
+            console.error('Error finding referrer:', origErr);
           }
         }
       } catch (err) {
-        console.error('Error creating referral usage:', err);
+        console.error('Error in referral process:', err);
       }
 
       if (paymentMethod === "cashfree") {

@@ -75,16 +75,13 @@ export default function Profile() {
       setFullName(data.full_name || "");
     }
     setIsLoading(false);
-    // ensure referral code exists for this user
+    // ensure referral code exists for this user (but don't auto-store in localStorage to prevent self-referral)
     try {
       if (user?.email) {
         const { data: existing } = await supabase.from("referrals").select("*").eq("referrer_email", user.email).maybeSingle();
-        if (existing && existing.referral_code) {
-          localStorage.setItem('referral_code', existing.referral_code);
-        } else if (!existing) {
+        if (!existing) {
           const code = ("REF-" + Math.random().toString(36).slice(2, 8).toUpperCase());
-          const { error } = await supabase.from("referrals").insert({ referrer_email: user.email, referrer_name: user.email.split("@")[0] || null, referral_code: code, status: "active", reward_amount: 49 });
-          if (!error) localStorage.setItem('referral_code', code);
+          await supabase.from("referrals").insert({ referrer_email: user.email, referrer_name: user.email.split("@")[0] || null, referral_code: code, status: "active", reward_amount: 49 });
         }
       }
     } catch (err) {

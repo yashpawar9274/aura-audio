@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { NotifyMeButton } from "@/components/notify/NotifyMeButton";
-import { ArrowRight, Bell, Tag } from "lucide-react";
+import { AuthModal } from "@/components/layout/AuthModal";
+import { useAuth } from "@/hooks/useAuth";
+import { ArrowRight, Bell, Tag, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import heroAirpods from "@/assets/hero-airpods.png";
 
@@ -15,10 +17,13 @@ interface SiteSettings {
   coupon_code: string | null;
   coupon_discount: number | null;
   coupon_active: boolean | null;
+  hero_video_url: string | null;
 }
 
 export function Hero() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     fetchSettings();
@@ -114,6 +119,18 @@ export function Hero() {
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
+
+              {!user && (
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  onClick={() => setAuthModalOpen(true)}
+                  className="gap-2"
+                >
+                  <Zap className="h-5 w-5" />
+                  Earn Rewards
+                </Button>
+              )}
               
               {settings?.show_upcoming_banner && (
                 <NotifyMeButton productName={"New AirPods"} />
@@ -139,22 +156,38 @@ export function Hero() {
 
           {/* Hero Image */}
           <div className="relative order-1 lg:order-2">
-            <div className="relative aspect-square max-w-lg mx-auto">
-              {/* Glow effect */}
-              <div className="absolute inset-0 bg-gradient-radial from-foreground/5 to-transparent rounded-full blur-3xl" />
-              
-              {/* Main image with floating animation */}
-              <img
-                src={heroAirpods}
-                alt="AirPods Pro floating"
-                className="relative w-full h-full object-contain animate-float drop-shadow-2xl"
-              />
-              
-              {/* Decorative circles */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] border border-border/30 rounded-full" />
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] border border-border/20 rounded-full" />
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[160%] h-[160%] border border-border/10 rounded-full" />
-            </div>
+            {settings?.hero_video_url ? (
+              <div className="relative aspect-video max-w-lg mx-auto rounded-2xl overflow-hidden shadow-2xl">
+                {/* Video Container */}
+                <video
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="w-full h-full object-cover"
+                  src={settings.hero_video_url}
+                />
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent" />
+              </div>
+            ) : (
+              <div className="relative aspect-square max-w-lg mx-auto">
+                {/* Glow effect */}
+                <div className="absolute inset-0 bg-gradient-radial from-foreground/5 to-transparent rounded-full blur-3xl" />
+                
+                {/* Main image with floating animation */}
+                <img
+                  src={heroAirpods}
+                  alt="AirPods Pro floating"
+                  className="relative w-full h-full object-contain animate-float drop-shadow-2xl"
+                />
+                
+                {/* Decorative circles */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] border border-border/30 rounded-full" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] border border-border/20 rounded-full" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[160%] h-[160%] border border-border/10 rounded-full" />
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -166,6 +199,9 @@ export function Hero() {
           <div className="w-1 h-2 bg-foreground rounded-full animate-bounce" />
         </div>
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
     </section>
   );
 }

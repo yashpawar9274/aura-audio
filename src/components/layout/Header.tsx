@@ -83,11 +83,11 @@ export function Header() {
               {link.label}
             </Link>)}
           <div className="flex gap-4 pt-4 border-t border-border">
-            <Button variant="outline" className="flex-1">
+            <Button variant="outline" className="flex-1" onClick={() => navigate("/products")}>
               <Search className="h-4 w-4 mr-2" />
               Search
             </Button>
-            <Button variant="outline" className="flex-1">
+            <Button variant="outline" className="flex-1" onClick={() => navigate(user ? "/profile" : "/auth")}>
               <User className="h-4 w-4 mr-2" />
               Account
             </Button>
