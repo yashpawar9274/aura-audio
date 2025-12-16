@@ -33,7 +33,7 @@ const Cart = () => {
   return (
     <>
       <Helmet>
-        <title>Your Cart | AirPods Store</title>
+        <title>Your Cart | SoundPods Store</title>
         <meta name="description" content="Review your cart and proceed to checkout." />
       </Helmet>
 
