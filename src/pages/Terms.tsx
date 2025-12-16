@@ -5,8 +5,8 @@ export default function Terms() {
   return (
     <>
       <Helmet>
-        <title>Terms of Service - AirPods Store</title>
-        <meta name="description" content="Read our terms of service governing the use of AirPods Store website and services." />
+        <title>Terms of Service - SoundPods Store</title>
+        <meta name="description" content="Read our terms of service governing the use of SoundPods Store website and services." />
       </Helmet>
 
       <Layout>
@@ -14,12 +14,12 @@ export default function Terms() {
           <div className="max-w-3xl mx-auto prose prose-neutral dark:prose-invert">
             <h1 className="text-3xl font-bold mb-8">Terms of Service</h1>
             
-            <p className="text-muted-foreground mb-6">Last updated: December 2024</p>
+            <p className="text-muted-foreground mb-6">Last updated: December 2025</p>
 
             <section className="mb-8">
               <h2 className="text-xl font-semibold mb-4">1. Acceptance of Terms</h2>
               <p className="text-muted-foreground">
-                By accessing and using AirPods Store, you accept and agree to be bound by 
+                By accessing and using SoundPods Store, you accept and agree to be bound by 
                 these Terms of Service. If you do not agree to these terms, please do not 
                 use our website.
               </p>
@@ -75,7 +75,7 @@ export default function Terms() {
               <h2 className="text-xl font-semibold mb-4">7. Contact</h2>
               <p className="text-muted-foreground">
                 For questions about these Terms of Service, please contact us at 
-                legal@airpodsstore.com
+                soundpods28@gmail.com 
               </p>
             </section>
           </div>

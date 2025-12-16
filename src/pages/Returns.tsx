@@ -14,7 +14,7 @@ export default function Returns() {
           <div className="max-w-3xl mx-auto prose prose-neutral dark:prose-invert">
             <h1 className="text-3xl font-bold mb-8">Return & Refund Policy</h1>
             
-            <p className="text-muted-foreground mb-6">Last updated: December 2024</p>
+            <p className="text-muted-foreground mb-6">Last updated: December 2025</p>
 
             <section className="mb-8">
               <h2 className="text-xl font-semibold mb-4">1. Return Eligibility</h2>
@@ -84,7 +84,7 @@ export default function Returns() {
             <section className="mb-8">
               <h2 className="text-xl font-semibold mb-4">7. Contact Us</h2>
               <p className="text-muted-foreground">
-                For return-related queries, please contact us at returns@airpodsstore.com 
+                For return-related queries, please contact us at returns@soundpodsstore.com 
                 or call our customer support.
               </p>
             </section>

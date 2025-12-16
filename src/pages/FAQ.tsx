@@ -9,7 +9,7 @@ import {
 const faqs = [
   {
     question: "What is the warranty period for AirPods?",
-    answer: "All AirPods come with a 1-year manufacturer warranty. Extended warranty options are available at checkout.",
+    answer: "All AirPods come with a 6-Month Dealer warranty. Extended warranty options are available at checkout.",
   },
   {
     question: "How long does shipping take?",
@@ -25,7 +25,7 @@ const faqs = [
   },
   {
     question: "How do I track my order?",
-    answer: "Once your order is shipped, you'll receive a tracking number via email. You can also track your order on our Track Order page using your order number and email.",
+    answer: "Once your order is shipped, you'll receive a tracking number via email Or Track order on website also. You can also track your order on our Track Order page using your order number and email.",
   },
   {
     question: "Do you offer Cash on Delivery?",
